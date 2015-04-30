@@ -91,6 +91,7 @@ public class MyFacePaper implements IFacePaper{
         this.conectado = conectado;
     }
 
+    @Override
     public void conectar(Command cmnd) throws FacePaperException {
         facepaperConnector.conectar(cmnd);
     }
