@@ -13,14 +13,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import uy.edu.ucu.p2.facebook.adt.Autor;
-import uy.edu.ucu.p2.facebook.adt.ILista;
-import uy.edu.ucu.p2.facebook.adt.Lista;
-import uy.edu.ucu.p2.facebook.adt.NodoPost;
+import uy.edu.ucu.p2.adt.impl.*;
+import uy.edu.ucu.p2.adt.interfaces.*;
 import uy.edu.ucu.p2.facebook.api.FacePaperImpl;
 import uy.edu.ucu.p2.facebook.api.FacepaperConnector;
 import uy.edu.ucu.p2.facebook.api.IFacePaper;
-import uy.edu.ucu.p2.facebook.adt.INodoPost;
 import uy.edu.ucu.p2.facebook.api.exceptions.FacePaperException;
 import uy.edu.ucu.p2.facebook.server.Command;
 
@@ -34,12 +31,14 @@ public class MyFacePaper implements IFacePaper{
     private boolean conectado = false;
 
        
-    private void conectado(){
+    private void conectado()
+    {
         this.conectado = true;
     }
     
     @Override
-    public FacepaperConnector getFacepaperConnector() {
+    public FacepaperConnector getFacepaperConnector() 
+    {
         return this.facepaperConnector;
     }
 
@@ -48,28 +47,33 @@ public class MyFacePaper implements IFacePaper{
      * @return obtiene del conector las noticias (getHome) y cargar la lista de NodoPost
      */
     @Override
-    public ILista<INodoPost> obtenerNoticias() throws FacePaperException {
+    public ILista<INodoPost> obtenerNoticias() throws FacePaperException 
+    {
         Post[] posts = this.getFacepaperConnector().getHome(10);
         ILista<INodoPost> result = new Lista<INodoPost>();
         
-        for (Post p: posts){
+        for (Post p: posts)
+        {
             int likes;
             likes = p.getLikes().size();
-            if (p.getDescription() == null){
-                if (p.getLink()==null){
+            if (p.getDescription() == null)
+            {
+                if (p.getLink() == null)
+                {
                     NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , p.getDescription());
-                result.insertar(nodo);
+                    result.insertar(nodo);
                 }
-                else{
-                NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , (p.getPicture().toString()));
-                result.insertar(nodo);
+                else
+                {
+                    NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , (p.getPicture().toString()));
+                    result.insertar(nodo);
                 }
             }
-            else{
+            else
+            {
                 NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , p.getDescription());
                 result.insertar(nodo);    
             }
-            
         }
        return result;
     }
@@ -127,7 +131,7 @@ public class MyFacePaper implements IFacePaper{
             ILista<INodoPost> lis = obtenerMuro();
             INodoPost actual = lis.getPrimero();
             while(actual != null){
-                salida += "\n" + actual.getAutor() + "\n" + actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" + actual.getFecha() + "\n" + separador;
+                salida += actual.getAutor() + "\n" + actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" + actual.getFecha() + "\n" + separador + "\n";
                 actual = (INodoPost) actual.getSiguiente();                
             }
             
@@ -181,12 +185,13 @@ public class MyFacePaper implements IFacePaper{
     }
         public String filtrarAutor(String unAutor) throws FacePaperException{
         String postsAutor = "";
+        String separador = "--------------";
         try {
-            ILista<INodoPost> lis = obtenerMuro();
+            ILista<INodoPost> lis = obtenerNoticias();
             INodoPost actual = lis.getPrimero();
-            while(actual!=null){
+            while(actual != null){
                 if(actual.getAutor().equals(unAutor)){
-                    postsAutor += actual.getTexto();                    
+                    postsAutor += actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" + actual.getFecha() + "\n" + separador + "\n";                    
                 }
                 actual = (INodoPost) actual.getSiguiente();
             } 
@@ -195,7 +200,7 @@ public class MyFacePaper implements IFacePaper{
         }
         return postsAutor; 
     }
-
+        
     public boolean isConectado() {
         return conectado;
     }

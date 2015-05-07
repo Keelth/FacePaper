@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import uy.edu.ucu.p2.facebook.adt.Autor;
+import uy.edu.ucu.p2.adt.impl.*;
+import uy.edu.ucu.p2.adt.interfaces.*;
 import uy.edu.ucu.p2.facebook.api.exceptions.FacePaperException;
 import uy.edu.ucu.p2.facebook.server.Command;
 
@@ -72,11 +73,11 @@ public class FacePaperMockForTest implements FacepaperConnector {
                 }
                 if(tipo%4==0)
                 {
-                posts.add(new MockPost(authorId, id, texto, fechaCreacion, nombreAutor, "video"));
-                feed.add(new MockFeed(112220112, id, texto, fechaCreacion, "Yo", "video"));
+                    posts.add(new MockPost(authorId, id, texto, fechaCreacion, nombreAutor, "video"));
+                    feed.add(new MockFeed(112220112, id, texto, fechaCreacion, "Yo", "video"));
                 } else {
                     posts.add(new MockPost(authorId, id, texto, fechaCreacion, nombreAutor, "mobile_status_update"));
-                feed.add(new MockFeed(112220112, id, texto, fechaCreacion, "Yo", "mobile_status_update"));
+                    feed.add(new MockFeed(112220112, id, texto, fechaCreacion, "Yo", "mobile_status_update"));
                 }
                 tipo++;
             }

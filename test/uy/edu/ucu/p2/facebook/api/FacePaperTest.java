@@ -13,8 +13,8 @@ import org.junit.Assert;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
-import uy.edu.ucu.p2.facebook.adt.ILista;
-import uy.edu.ucu.p2.facebook.adt.INodoPost;
+import uy.edu.ucu.p2.adt.impl.*;
+import uy.edu.ucu.p2.adt.interfaces.*;
 import uy.edu.ucu.p2.facebook.api.exceptions.FacePaperException;
 import uy.edu.ucu.p2.facebook.server.Command;
 
@@ -27,6 +27,8 @@ public class FacePaperTest {
     private IFacePaper facePaper;
     private Date today = new Date();
     private FacePaperMockForTest mock;
+    private Post[] home;
+    private Post[] feed;
 
     public FacePaperTest() {
         facePaper = new IFacePaper() {
@@ -37,8 +39,32 @@ public class FacePaperTest {
 
             @Override
             public ILista<INodoPost> obtenerNoticias() throws FacePaperException {
-          
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                Post[] a = home;
+                ILista<INodoPost> resultado = new Lista<INodoPost>();
+                for (Post post: a)
+                {
+                    int likes;
+                    likes = post.getLikes().size();
+                    if (post.getDescription() == null)
+                    {
+                        if (post.getLink() == null)
+                        {
+                            NodoPost nodo = new NodoPost(post.getId(), post.getCreatedTime(), likes, new Autor(post.getFrom().getId(),post.getFrom().getName()) , post.getDescription());
+                            resultado.insertar(nodo);
+                        }
+                        else
+                        {
+                            NodoPost nodo = new NodoPost(post.getId(), post.getCreatedTime(), likes, new Autor(post.getFrom().getId(),post.getFrom().getName()) , (post.getPicture().toString()));
+                            resultado.insertar(nodo);
+                        }
+                    }
+                    else
+                    {
+                        NodoPost nodo = new NodoPost(post.getId(), post.getCreatedTime(), likes, new Autor(post.getFrom().getId(),post.getFrom().getName()) , post.getDescription());
+                        resultado.insertar(nodo);    
+                    }
+                }
+                return resultado;
             }
 
             @Override
@@ -62,7 +88,6 @@ public class FacePaperTest {
     public void setUp() {
         this.mock = new FacePaperMockForTest(today);
     }
-
     /**
      * Test of getFacepaperConnector method, of class IFacePaper.
      */
@@ -81,7 +106,6 @@ public class FacePaperTest {
                 ILista<INodoPost> lista = facePaper.obtenerNoticias();
                 INodoPost nodo = lista.buscar(post.getId());
                 if (post.getType().equals("mobile_status_update")) {
-
                     Assert.assertNotNull(nodo);
                     Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
                     Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
@@ -96,7 +120,6 @@ public class FacePaperTest {
                 ILista<INodoPost> lista = facePaper.obtenerMuro();
                 INodoPost nodo = lista.buscar(post.getId());
                 if (post.getType().equals("mobile_status_update")) {
-
                     Assert.assertNotNull(nodo);
                     Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
                     Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
@@ -123,7 +146,6 @@ public class FacePaperTest {
                 ILista<INodoPost> lista = facePaper.obtenerMuro();
                 INodoPost nodo = lista.buscar(post.getId());
                 if (post.getType().equals("mobile_status_update")) {
-
                     Assert.assertNotNull(nodo);
                     Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
                     Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
