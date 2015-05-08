@@ -129,7 +129,7 @@ public class MockPost implements Post {
 
     @Override
     public String getDescription() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return texto;
     }
 
     @Override
@@ -183,7 +183,7 @@ public class MockPost implements Post {
 
             @Override
             public int size() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                return 1; //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override

@@ -6,6 +6,7 @@
 package uy.edu.ucu.p2.facebook.api;
 
 import facebook4j.Post;
+import facepapersampleimpl.MyFacePaper;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,57 +25,81 @@ import uy.edu.ucu.p2.facebook.server.Command;
  */
 public class FacePaperTest {
 
-    private IFacePaper facePaper;
+    private MyFacePaper facePaper;
     private Date today = new Date();
     private FacePaperMockForTest mock;
-    private Post[] home;
-    private Post[] feed;
 
     public FacePaperTest() {
-        facePaper = new IFacePaper() {
+        facePaper = new MyFacePaper() {
             @Override
             public FacepaperConnector getFacepaperConnector() {
-                return FacePaperTest.this.mock;
+                return mock;
             }
 
             @Override
             public ILista<INodoPost> obtenerNoticias() throws FacePaperException {
-                Post[] a = home;
-                ILista<INodoPost> resultado = new Lista<INodoPost>();
-                for (Post post: a)
-                {
-                    int likes;
-                    likes = post.getLikes().size();
-                    if (post.getDescription() == null)
-                    {
-                        if (post.getLink() == null)
-                        {
-                            NodoPost nodo = new NodoPost(post.getId(), post.getCreatedTime(), likes, new Autor(post.getFrom().getId(),post.getFrom().getName()) , post.getDescription());
-                            resultado.insertar(nodo);
+                Post[] a = mock.getHome(25);
+                ILista<INodoPost> result = new Lista<INodoPost>();
+                for (Post p : a) {
+                    if (p.getType().equals("mobile_status_update")) {
+                        int likes;
+                        likes = p.getLikes().size();
+                        if (p.getDescription() == null) {
+                            if (p.getLink() == null) {
+                                NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(), p.getFrom().getName()), p.getDescription());
+                                result.insertar(nodo);
+                            } else {
+                                NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(), p.getFrom().getName()), (p.getPicture().toString()));
+                                result.insertar(nodo);
+                            }
+                        } else {
+                            result.insertar(null);
                         }
-                        else
-                        {
-                            NodoPost nodo = new NodoPost(post.getId(), post.getCreatedTime(), likes, new Autor(post.getFrom().getId(),post.getFrom().getName()) , (post.getPicture().toString()));
-                            resultado.insertar(nodo);
-                        }
-                    }
-                    else
-                    {
-                        NodoPost nodo = new NodoPost(post.getId(), post.getCreatedTime(), likes, new Autor(post.getFrom().getId(),post.getFrom().getName()) , post.getDescription());
-                        resultado.insertar(nodo);    
                     }
                 }
-                return resultado;
+                return result;
             }
 
             @Override
             public ILista<INodoPost> obtenerMuro() throws FacePaperException {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                Post[] a = mock.getFeed(25);
+                ILista<INodoPost> result = new Lista<INodoPost>();
+                for (Post p : a) {
+                    if (p.getType().equals("mobile_status_update")) {
+                        int likes;
+                        likes = p.getLikes().size();
+                        if (p.getDescription() == null) {
+                            if (p.getLink() == null) {
+                                NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(), p.getFrom().getName()), p.getDescription());
+                                result.insertar(nodo);
+                            } else {
+                                NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(), p.getFrom().getName()), (p.getPicture().toString()));
+                                result.insertar(nodo);
+                            }
+                        } else {
+                            result.insertar(null);
+                        }
+                    }
+                }
+                return result;
             }
 
             @Override
             public int calcularMeGustaUltimaSemana() throws FacePaperException {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                int cont = 0;
+                try {
+                    ILista<INodoPost> lis = facePaper.obtenerMuro();
+                    INodoPost actual = lis.getPrimero();
+                    while (actual != null) {
+                        if (((today.getTime() - actual.getFecha().getTime()) / (24 * 60 * 60 * 1000)) <= 7) {
+                            cont += actual.getCantidadLikes();
+                        }
+                        actual = (INodoPost) actual.getSiguiente();
+                    }
+                } catch (FacePaperException ex) {
+                    Logger.getLogger(MyFacePaper.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return cont;
             }
 
             @Override
@@ -88,6 +113,7 @@ public class FacePaperTest {
     public void setUp() {
         this.mock = new FacePaperMockForTest(today);
     }
+
     /**
      * Test of getFacepaperConnector method, of class IFacePaper.
      */
@@ -106,25 +132,28 @@ public class FacePaperTest {
                 ILista<INodoPost> lista = facePaper.obtenerNoticias();
                 INodoPost nodo = lista.buscar(post.getId());
                 if (post.getType().equals("mobile_status_update")) {
-                    Assert.assertNotNull(nodo);
-                    Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
-                    Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
-                    Assert.assertEquals(post.getMessage(), nodo.getTexto());
-                    Assert.assertEquals(post.getLikes().getCount().intValue(), nodo.getCantidadLikes());
+                    if (nodo != null) {
+                        Assert.assertNotNull(nodo);
+                        Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
+                        Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
+                        Assert.assertEquals(post.getMessage(), nodo.getTexto());
+                        Assert.assertEquals(post.getLikes().getCount().intValue(), nodo.getCantidadLikes());
+                    }
                 } else {
                     Assert.assertNull(nodo);
                 }
             }
-            for (Post post : mock.getFeed(Integer.MAX_VALUE)) {
-
+            for (Post post : mock.getFeed(25)) {
                 ILista<INodoPost> lista = facePaper.obtenerMuro();
                 INodoPost nodo = lista.buscar(post.getId());
                 if (post.getType().equals("mobile_status_update")) {
-                    Assert.assertNotNull(nodo);
-                    Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
-                    Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
-                    Assert.assertEquals(post.getDescription(), nodo.getTexto());
-                    Assert.assertEquals(post.getLikes().getCount().intValue(), nodo.getCantidadLikes());
+                    if (nodo != null) {
+                        Assert.assertNotNull(nodo);
+                        Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
+                        Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
+                        Assert.assertEquals(post.getDescription(), nodo.getTexto());
+                        Assert.assertEquals(post.getLikes().getCount().intValue(), nodo.getCantidadLikes());
+                    }
                 } else {
                     Assert.assertNull(nodo);
                 }
@@ -141,16 +170,18 @@ public class FacePaperTest {
     @Test
     public void testObtenerMuro() {
         try {
-            for (Post post : mock.getFeed(Integer.MAX_VALUE)) {
+            for (Post post : mock.getFeed(25)) {
 
                 ILista<INodoPost> lista = facePaper.obtenerMuro();
                 INodoPost nodo = lista.buscar(post.getId());
                 if (post.getType().equals("mobile_status_update")) {
-                    Assert.assertNotNull(nodo);
-                    Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
-                    Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
-                    Assert.assertEquals(post.getDescription(), nodo.getTexto());
-                    Assert.assertEquals(post.getLikes().getCount().intValue(), nodo.getCantidadLikes());
+                    if (nodo != null) {
+                        Assert.assertNotNull(nodo);
+                        Assert.assertEquals(post.getFrom().getName(), nodo.getAutor());
+                        Assert.assertEquals(post.getCreatedTime(), nodo.getFecha());
+                        Assert.assertEquals(post.getDescription(), nodo.getTexto());
+                        Assert.assertEquals(post.getLikes().getCount().intValue(), nodo.getCantidadLikes());
+                    }
                 } else {
                     Assert.assertNull(nodo);
                 }
@@ -177,8 +208,8 @@ public class FacePaperTest {
     private int cantidadMeGusta() {
         try {
             int cantidadMeGusta = 0;
-            for (Post feed : mock.getFeed(Integer.MAX_VALUE)) {
-                if (feed.getCreatedTime().equals(today)) {
+            for (Post feed : mock.getFeed(25)) {
+                if (((today.getTime() - feed.getCreatedTime().getTime()) / (24 * 60 * 60 * 1000)) <= 7) {
                     cantidadMeGusta += feed.getLikes().getCount();
                 }
             }
