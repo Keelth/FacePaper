@@ -25,220 +25,182 @@ import uy.edu.ucu.p2.facebook.server.Command;
  *
  * @author diego
  */
-public class MyFacePaper implements IFacePaper {
-
+public class MyFacePaper implements IFacePaper{
+    
     private FacepaperConnector facepaperConnector = new FacePaperImpl();
     private boolean conectado = false;
 
-    private void conectado() {
+       
+    private void conectado()
+    {
         this.conectado = true;
     }
-
+    
     @Override
-    public FacepaperConnector getFacepaperConnector() {
+    public FacepaperConnector getFacepaperConnector() 
+    {
         return this.facepaperConnector;
     }
 
     /**
-     *
-     * @return obtiene del conector las noticias (getHome) y cargar la lista de
-     * NodoPost
+     * 
+     * @return obtiene del conector las noticias (getHome) y cargar la lista de NodoPost
      */
     @Override
-    public ILista<INodoPost> obtenerNoticias() throws FacePaperException {
-        Post[] posts = this.getFacepaperConnector().getHome(5);
+    public ILista<INodoPost> obtenerNoticias() throws FacePaperException 
+    {
+        Post[] posts = this.getFacepaperConnector().getHome(10);
         ILista<INodoPost> result = new Lista<INodoPost>();
-
-        for (Post p : posts) {
+        
+        for (Post p: posts)
+        {
             int likes;
             likes = p.getLikes().size();
-            if (p.getDescription() == null) {
-                if (p.getLink() == null) {
-                    NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new AutorFacebook(p.getFrom().getId(), p.getFrom().getName()), p.getDescription());
-                    result.insertar(nodo);
-                } else {
-                    NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new AutorFacebook(p.getFrom().getId(), p.getFrom().getName()), (p.getPicture().toString()));
+            if (p.getDescription() == null)
+            {
+                if (p.getLink() == null)
+                {
+                    NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , p.getDescription());
                     result.insertar(nodo);
                 }
-            } else {
-                NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new AutorFacebook(p.getFrom().getId(), p.getFrom().getName()), p.getDescription());
-                result.insertar(nodo);
+                else
+                {
+                    NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , (p.getPicture().toString()));
+                    result.insertar(nodo);
+                }
+            }
+            else
+            {
+                NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , p.getDescription());
+                result.insertar(nodo);    
             }
         }
-        return result;
+       return result;
     }
-
     /**
-     *
-     * @return Un String con todas las noticias
-     * @throws FacePaperException
+     * 
+     * @return Un String con todas las noticias 
+     * @throws FacePaperException 
      */
-    public String muro() throws FacePaperException {
+    public String muro() throws FacePaperException{
         String salida = "";
         String separador = "---------------------------------------------";
         try {
             ILista<INodoPost> lis = obtenerNoticias();
             INodoPost actual = lis.getPrimero();
-            while (actual != null) {
-                salida += actual.getAutor() + "\n" + actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" + actual.getFecha() + "\n" + separador + "\n";
-                actual = (INodoPost) actual.getSiguiente();
-            }
+            while(actual != null){
+                salida += actual.getAutor() + "\n" + actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" +  actual.getFecha() + "\n" + separador + "\n";
+                actual = (INodoPost) actual.getSiguiente();                
+            } 
+            
+
         } catch (FacePaperException ex) {
             Logger.getLogger(MyFacePaper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return salida;
+        return salida;   
     }
-
     /**
-     *
+     * 
      * @return Un String[] con cada Autor
-     * @throws FacePaperException
+     * @throws FacePaperException 
      */
-    public String autores() throws FacePaperException {
+        public String autores() throws FacePaperException{
         String salida = "";
-        String separador = ",";
+        String separador= ",";
         try {
             ILista<INodoPost> lis = obtenerNoticias();
             INodoPost actual = lis.getPrimero();
-            while (actual != null) {
-                salida += actual.getAutor() + separador;
-                actual = (INodoPost) actual.getSiguiente();
+            while(actual != null){
+                salida += actual.getAutor()+separador;
+                actual = (INodoPost) actual.getSiguiente();                
             }
         } catch (FacePaperException ex) {
             Logger.getLogger(MyFacePaper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return salida;
+        return salida;   
     }
-
-    /**
-     *
-     * @return Un String con todos Mis posts
-     * @throws FacePaperException
-     */
-    public String perfil() throws FacePaperException {
+        /**
+         * 
+         * @return Un String con todos Mis posts
+         * @throws FacePaperException 
+         */
+        public String perfil() throws FacePaperException{
         String salida = "";
         String separador = "---------------------------------------------";
         try {
             ILista<INodoPost> lis = obtenerMuro();
             INodoPost actual = lis.getPrimero();
-            while (actual != null) {
+            while(actual != null){
                 salida += actual.getAutor() + "\n" + actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" + actual.getFecha() + "\n" + separador + "\n";
-                actual = (INodoPost) actual.getSiguiente();
+                actual = (INodoPost) actual.getSiguiente();                
             }
+            
 
         } catch (FacePaperException ex) {
             Logger.getLogger(MyFacePaper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return salida;
+        return salida;   
     }
 
     /**
-     *
-     * @return obtiene del conector tus Posts (getFeed) y cargar la lista de
-     * NodoPost
+     * 
+     * @return obtiene del conector tus Posts (getFeed) y cargar la lista de NodoPost
      */
     @Override
-    public ILista<INodoPost> obtenerMuro() throws FacePaperException {
-        Post[] posts = this.getFacepaperConnector().getFeed(5);
+    public ILista<INodoPost> obtenerMuro() throws FacePaperException{
+        Post[] posts = this.getFacepaperConnector().getFeed(123);
         ILista<INodoPost> result = new Lista<INodoPost>();
-        for (Post p : posts) {
+        
+        for (Post p: posts){
             int likes;
             likes = p.getLikes().size();
-            NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new AutorFacebook(p.getFrom().getId(), p.getFrom().getName()), p.getDescription());
+            NodoPost nodo = new NodoPost(p.getId(), p.getCreatedTime(), likes, new Autor(p.getFrom().getId(),p.getFrom().getName()) , p.getDescription());
             result.insertar(nodo);
         }
         return result;
-
+      
     }
 
     /**
-     *
-     * @return obtiene del conector tus posts, de tus posts los Me Gusta
-     * (getLikes), los suma y retorna tal suma
+     * 
+     * @return obtiene del conector tus posts, de tus posts los Me Gusta (getLikes), los suma y retorna tal suma
      */
     @Override
-    public int calcularMeGustaUltimaSemana() throws FacePaperException {
+    public int calcularMeGustaUltimaSemana() throws FacePaperException{
         int cont = 0;
         try {
             ILista<INodoPost> lis = obtenerMuro();
             Date hoy = new Date();
             INodoPost actual = lis.getPrimero();
-            while (actual != null) {
-                if (((hoy.getTime() - actual.getFecha().getTime()) / (24 * 60 * 60 * 1000)) <= 7) {
-                    cont += actual.getCantidadLikes();
+            while(actual!=null){
+                if(((hoy.getTime() - actual.getFecha().getTime()) / (24*60*60*1000)) <= 7){
+                    cont += actual.getCantidadLikes();                    
                 }
                 actual = (INodoPost) actual.getSiguiente();
-            }
+            } 
         } catch (FacePaperException ex) {
             Logger.getLogger(MyFacePaper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return cont;
+        return cont; 
     }
-
-    public int calcularMeGusta(ILista<INodoPost> unaLista) throws FacePaperException {
-        int cont = 0;
-        ILista<INodoPost> lis = unaLista;
-        Date hoy = new Date();
-        INodoPost actual = lis.getPrimero();
-        while (actual != null) {
-            if (((hoy.getTime() - actual.getFecha().getTime()) / (24 * 60 * 60 * 1000)) <= 7) {
-                cont += actual.getCantidadLikes();
-            }
-            actual = (INodoPost) actual.getSiguiente();
-        }
-        return cont;
-    }
-
-    public String filtrarAutor(String unAutor, ILista<INodoPost> unaLista) throws FacePaperException {
+        public String filtrarAutor(String unAutor) throws FacePaperException{
         String postsAutor = "";
         String separador = "--------------";
-        ILista<INodoPost> lis = unaLista;
-        INodoPost actual = lis.getPrimero();
-        while (actual != null) {
-            if (actual.getAutor().equals(unAutor)) {
-                postsAutor += actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" + actual.getFecha() + "\n" + separador + "\n";
-            }
-            actual = (INodoPost) actual.getSiguiente();
-        }
-        return postsAutor;
-    }
-
-    public ArbolAVL palabrasUtilizadas(ILista<INodoPost> unaLista) {
-        ArbolAVL ar = new ArbolAVL();
-        ILista<INodoPost> lis = unaLista;
-        INodoPost actual = lis.getPrimero();
-        Integer[] contador = {0};
-        String[] palabras;
-        while (actual != null) {
-            if (actual.getTexto() != null) {
-                palabras = new String[(actual.getTexto().split(" ").length) + 1];
-                for (int i = 0; i < actual.getTexto().split(" ").length; i++) {
-                    palabras[i] = actual.getTexto().split(" ")[i];
-                }
-                for (String palabra : palabras) {
-                    if (palabra != null) {
-                        if (ar.buscar(palabra.toLowerCase(), contador) == null) {
-                            NodoAVL nodo = new NodoAVL(palabra.toLowerCase());
-                            ar.insertar(nodo);
-                        } else {
-                            ar.buscar(palabra.toLowerCase(), contador).actualizarFrecuencia(1);
-                        }
-                    }
+        try {
+            ILista<INodoPost> lis = obtenerNoticias();
+            INodoPost actual = lis.getPrimero();
+            while(actual != null){
+                if(actual.getAutor().equals(unAutor)){
+                    postsAutor += actual.getTexto() + "\n" + "Cantidad de 'Me Gusta': " + actual.getCantidadLikes() + "\n" + actual.getFecha() + "\n" + separador + "\n";                    
                 }
                 actual = (INodoPost) actual.getSiguiente();
-            } else {
-                if (ar.buscar("null", contador) == null) {
-                    NodoAVL nodo = new NodoAVL("null");
-                    ar.insertar(nodo);
-                } else {
-                    ar.buscar("null", contador).actualizarFrecuencia(1);
-                }
-                actual = (INodoPost) actual.getSiguiente();
-            }
+            } 
+        } catch (FacePaperException ex) {
+            Logger.getLogger(MyFacePaper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return ar;
+        return postsAutor; 
     }
-
+        
     public boolean isConectado() {
         return conectado;
     }
@@ -251,5 +213,5 @@ public class MyFacePaper implements IFacePaper {
     public void conectar(Command cmnd) throws FacePaperException {
         facepaperConnector.conectar(cmnd);
     }
-
+    
 }
