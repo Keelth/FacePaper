@@ -183,7 +183,7 @@ public class MockFeed implements Post {
 
                             @Override
                             public int size() {
-                                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                                return 1;
                             }
 
                             @Override

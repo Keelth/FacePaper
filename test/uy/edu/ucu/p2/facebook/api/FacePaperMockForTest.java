@@ -105,7 +105,7 @@ public class FacePaperMockForTest implements FacepaperConnector {
 
     @Override
     public Post[] getHome(int limite) throws FacePaperException {
-        if(limite<posts.size())
+        if(limite < posts.size())
         {
            Post[] p = new Post[limite];
            for(int i =0; i < limite; i++)
